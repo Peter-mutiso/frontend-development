@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Generator - Mwaniki Enterprise</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+        }
+        .invoice-section, .input-section, .logo-section, .history-section {
+            width: 100%;
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background: #fff;
+        }
+        .invoice-section h2, .input-section h2, .logo-section h2, .history-section h2 {
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .print-btn {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .btn-red {
+            background-color: red;
+        }
+        .btn-blue {
+            background-color: blue;
+        }
+        .upload-btn {
+            background-color: #4CAF50;
+        }
+        .upload-btn input {
+            display: none;
+        }
+        .payment-section {
+            margin-top: 20px;
+        }
+        .editable {
+            background-color: #f9f9f9;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            button {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-section">
+            <h2>Upload Company Logo</h2>
+            <input type="file" id="logo-upload" accept="image/*" />
+            <img id="logo-display" src="" alt="Company Logo" style="display: none; width: 100px; height: auto;" />
+        </div>
+
+        <div class="input-section">
+            <h2>Enter Invoice Details - Mwaniki Enterprise</h2>
+            <div>
+                <label for="invoice-number">Invoice Number:</label>
+                <input type="text" id="invoice-number" placeholder="Invoice number will be generated automatically" readonly /><br><br>
+
+                <label for="client-name">Client Name:</label>
+                <input type="text" id="client-name-input" placeholder="Enter client name" /><br><br>
+
+                <label for="invoice-date">Invoice Date:</label>
+                <input type="date" id="invoice-date" /><br><br>
+            </div>
+
+            <h3>Goods/Services</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Cost Price (Admin)</th>
+                        <th>Total</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="item-rows">
+                    <!-- Item rows will be dynamically inserted here -->
+                </tbody>
+            </table>
+            
+            <button class="btn-blue" onclick="addItem()">Add Item</button>
+
+            <div>
+                <label for="discount">Discount (%):</label>
+                <input type="number" id="discount" value="0" min="0" /><br><br>
+
+                <label for="tax">Tax (%):</label>
+                <input type="number" id="tax" value="0" min="0" /><br><br>
+                
+                <button onclick="showInvoiceSelection()">Generate Invoices</button>
+            </div>
+
+            <div class="payment-section">
+                <h3>Payment Details</h3>
+                <label for="payment-method">Payment Method:</label>
+                <select id="payment-method" onchange="togglePaymentDetails()">
+                    <option value="cash">Cash</option>
+                    <option value="bank">Bank</option>
+                    <option value="till">Till</option>
+                    <option value="sendMoney">Send Money</option>
+                </select><br><br>
+
+                <div id="payment-details" style="display: none;">
+                    <label for="payment-details-input">Enter Details:</label>
+                    <input type="text" id="payment-details-input" placeholder="Enter bank account number, till number, or send money details" /><br><br>
+                </div>
+            </div>
+        </div>
+
+        <div class="invoice-section" id="client-invoice" style="display:none;">
+            <h2>Client Invoice - Mwaniki Enterprise</h2>
+            <div>
+                <strong>Invoice Number:</strong> <span id="client-invoice-no"></span><br>
+                <strong>Date:</strong> <span id="client-invoice-date"></span><br>
+                <strong>Client Name:</strong> <span id="client-invoice-client-name"></span>
+            </div>
+
+            <h3>Goods/Services</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody id="client-items">
+                    <!-- Items will be dynamically inserted here -->
+                </tbody>
+            </table>
+
+            <div>
+                <strong>Subtotal:</strong> <span id="client-subtotal"></span><br>
+                <strong>Discount:</strong> <span id="client-discount"></span><br>
+                <strong>Tax:</strong> <span id="client-tax"></span><br>
+                <strong>Total:</strong> <span id="client-total"></span>
+            </div>
+
+            <div class="print-btn">
+                <button onclick="printInvoice('client-invoice')">Print Client Invoice</button>
+            </div>
+        </div>
+
+        <div class="invoice-section" id="admin-invoice" style="display:none;">
+            <h2>Admin Invoice - Mwaniki Enterprise</h2>
+            <div>
+                <strong>Invoice Number:</strong> <span id="admin-invoice-no"></span><br>
+                <strong>Date:</strong> <span id="admin-invoice-date"></span><br>
+                <strong>Client Name:</strong> <span id="admin-client-name"></span>
+            </div>
+
+            <h3>Goods/Services</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Cost Price</th>
+                        <th>Total</th>
+                        <th>Profit/Loss</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-items">
+                    <!-- Items will be dynamically inserted here -->
+                </tbody>
+            </table>
+
+            <div>
+                <strong>Subtotal:</strong> <span id="admin-subtotal"></span><br>
+                <strong>Discount:</strong> <span id="admin-discount"></span><br>
+                <strong>Tax:</strong> <span id="admin-tax"></span><br>
+                <strong>Total:</strong> <span id="admin-total"></span><br>
+                <strong>Profit/Loss:</strong> <span id="admin-profit-loss"></span>
+            </div>
+
+            <div class="print-btn">
+                <button onclick="printInvoice('admin-invoice')" class="btn-red">Print Admin Invoice</button>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>Invoice History</h2>
+            <button onclick="viewPreviousInvoices()">View Previous Invoices</button>
+            <div id="invoice-history" style="display:none;">
+                <!-- Previous invoices will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let invoiceCount = 0;
+        const items = [];
+        let invoices = [];
+
+        function generateInvoiceNumber() {
+            return 'INV-' + (++invoiceCount);
+        }
+
+        function addItem() {
+            const itemName = prompt("Enter item name:");
+            const quantity = parseFloat(prompt("Enter quantity:"));
+            const unitPrice = parseFloat(prompt("Enter unit price:"));
+            const costPrice = parseFloat(prompt("Enter cost price (for admin):"));
+
+            if (!itemName || isNaN(quantity) || isNaN(unitPrice) || isNaN(costPrice)) {
+                alert("Please enter valid item details.");
+                return;
+            }
+
+            const total = quantity * unitPrice;
+            items.push({ itemName, quantity, unitPrice, costPrice, total });
+
+            updateItemsTable();
+        }
+
+        function updateItemsTable() {
+            const itemRows = document.getElementById('item-rows');
+            itemRows.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.itemName}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.unitPrice.toFixed(2)}</td>
+                    <td>${item.costPrice.toFixed(2)}</td>
+                    <td>${item.total.toFixed(2)}</td>
+                    <td><button onclick="editItem(${index})">Edit</button> <button onclick="deleteItem(${index})">Delete</button></td>
+                `;
+                itemRows.appendChild(row);
+            });
+        }
+
+        function editItem(index) {
+            const item = items[index];
+
+            const newItemName = prompt("Enter new item name:", item.itemName);
+            const newQuantity = parseFloat(prompt("Enter new quantity:", item.quantity));
+            const newUnitPrice = parseFloat(prompt("Enter new unit price:", item.unitPrice));
+            const newCostPrice = parseFloat(prompt("Enter new cost price (for admin):", item.costPrice));
+
+            if (!newItemName || isNaN(newQuantity) || isNaN(newUnitPrice) || isNaN(newCostPrice)) {
+                alert("Please enter valid item details.");
+                return;
+            }
+
+            items[index] = { itemName: newItemName, quantity: newQuantity, unitPrice: newUnitPrice, costPrice: newCostPrice, total: newQuantity * newUnitPrice };
+            updateItemsTable();
+        }
+
+        function deleteItem(index) {
+            if (confirm("Are you sure you want to delete this item?")) {
+                items.splice(index, 1);
+                updateItemsTable();
+            }
+        }
+
+        function showInvoiceSelection() {
+            const invoiceNumber = generateInvoiceNumber();
+            const clientName = document.getElementById('client-name-input').value;
+            const invoiceDate = document.getElementById('invoice-date').value;
+
+            if (!clientName || !invoiceDate) {
+                alert("Please enter client name and invoice date.");
+                return;
+            }
+
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const tax = parseFloat(document.getElementById('tax').value) || 0;
+
+            const subtotal = items.reduce((acc, item) => acc + item.total, 0);
+            const discountAmount = subtotal * (discount / 100);
+            const taxAmount = (subtotal - discountAmount) * (tax / 100);
+            const total = subtotal - discountAmount + taxAmount;
+
+            document.getElementById('client-invoice-no').textContent = invoiceNumber;
+            document.getElementById('client-invoice-date').textContent = invoiceDate;
+            document.getElementById('client-invoice-client-name').textContent = clientName;
+            document.getElementById('client-subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('client-discount').textContent = discountAmount.toFixed(2);
+            document.getElementById('client-tax').textContent = taxAmount.toFixed(2);
+            document.getElementById('client-total').textContent = total.toFixed(2);
+
+            document.getElementById('admin-invoice-no').textContent = invoiceNumber;
+            document.getElementById('admin-invoice-date').textContent = invoiceDate;
+            document.getElementById('admin-client-name').textContent = clientName;
+            document.getElementById('admin-subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('admin-discount').textContent = discountAmount.toFixed(2);
+            document.getElementById('admin-tax').textContent = taxAmount.toFixed(2);
+            document.getElementById('admin-total').textContent = total.toFixed(2);
+            document.getElementById('admin-profit-loss').textContent = (subtotal - items.reduce((acc, item) => acc + item.costPrice * item.quantity, 0)).toFixed(2);
+
+            const clientItems = document.getElementById('client-items');
+            const adminItems = document.getElementById('admin-items');
+
+            clientItems.innerHTML = '';
+            adminItems.innerHTML = '';
+
+            items.forEach((item, index) => {
+                clientItems.innerHTML += `
+                    <tr>
+                        <td>${item.itemName}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unitPrice.toFixed(2)}</td>
+                        <td>${(item.quantity * item.unitPrice).toFixed(2)}</td>
+                    </tr>
+                `;
+
+                adminItems.innerHTML += `
+                    <tr>
+                        <td>${item.itemName}</td>
+                        <td>${item.quantity}</td>
+                        <td>${item.unitPrice.toFixed(2)}</td>
+                        <td>${item.costPrice.toFixed(2)}</td>
+                        <td>${item.total.toFixed(2)}</td>
+                        <td>${(item.total - item.costPrice * item.quantity).toFixed(2)}</td>
+                        <td><button onclick="editItem(${index})">Edit</button> <button onclick="deleteItem(${index})">Delete</button></td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('client-invoice').style.display = 'block';
+            document.getElementById('admin-invoice').style.display = 'block';
+
+            invoices.push({
+                invoiceNumber,
+                date: invoiceDate,
+                clientName,
+                items,
+                discount,
+                tax,
+                subtotal,
+                total
+            });
+
+            items.length = 0;  // Clear the items for the next invoice
+        }
+
+        function printInvoice(id) {
+            const invoiceContent = document.getElementById(id).innerHTML;
+            const printWindow = window.open('', '', 'height=600,width=800');
+            printWindow.document.write('<html><head><title>Print Invoice</title>');
+            printWindow.document.write('</head><body >');
+            printWindow.document.write(invoiceContent);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+            printWindow.print();
+        }
+
+        function viewPreviousInvoices() {
+            const historySection = document.getElementById('invoice-history');
+            historySection.innerHTML = '';
+
+            invoices.forEach((invoice, index) => {
+                historySection.innerHTML += `
+                    <div>
+                        <h4>Invoice ${invoice.invoiceNumber}</h4>
+                        <p>Date: ${invoice.date}</p>
+                        <p>Client Name: ${invoice.clientName}</p>
+                        <button onclick="editInvoice(${index})">Edit</button>
+                        <button onclick="deleteInvoice(${index})" class="btn-red">Delete</button>
+                    </div>
+                `;
+            });
+
+            historySection.style.display = 'block';
+        }
+
+        function editInvoice(index) {
+            const invoice = invoices[index];
+            document.getElementById('client-name-input').value = invoice.clientName;
+            document.getElementById('invoice-date').value = invoice.date;
+            items.length = 0;
+            invoice.items.forEach(item => items.push(item));
+            updateItemsTable();
+            document.getElementById('client-invoice').style.display = 'none';
+            document.getElementById('admin-invoice').style.display = 'none';
+        }
+
+        function deleteInvoice(index) {
+            if (confirm("Are you sure you want to delete this invoice?")) {
+                invoices.splice(index, 1);
+                viewPreviousInvoices();
+            }
+        }
+
+        function togglePaymentDetails() {
+            const paymentMethod = document.getElementById('payment-method').value;
+            const paymentDetails = document.getElementById('payment-details');
+            paymentDetails.style.display = (paymentMethod === 'cash') ? 'none' : 'block';
+        }
+
+        document.getElementById('logo-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('logo-display').src = e.target.result;
+                    document.getElementById('logo-display').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improved Judicial Case System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Improved Judicial Case System</h1>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <ul>
+            <li><a href="#" onclick="showSection('dashboard')">Dashboard</a></li>
+            <li><a href="#" onclick="showSection('newCases')">New Cases</a></li>
+            <li><a href="#" onclick="showSection('uploadcourtdocuments')">Court Uploads</a></li>
+            <li><a href="#" onclick="showSection('mappingRequests')">Mapping Requests</a></li>
+            <li><a href="#" onclick="showSection('invoices')">Invoices</a></li>
+            <li><a href="#" onclick="showSection('users')">Users</a></li>
+            <li><a href="#" onclick="showSection('missingFiles')">Missing Files</a></li>
+            <li><a href="#" onclick="showSection('Messages, Requests, and Complaints')">Messages, Requests, and Complaints</a></li>
+            
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <form id="searchForm" onsubmit="searchCases(event)">
+                <label for="searchInput">Search by Case No, Party Name, Receipt No, or Invoice:</label>
+                <input type="text" id="searchInput" name="searchInput" required>
+                <button type="submit">Search</button>
+            </form>
+    
+            <!-- Display Search Results -->
+            <div id="searchResults">
+                <!-- Search results will be dynamically inserted here -->
+                <script>
+                    // Function to search for cases based on input
+                    function searchCases(event) {
+                        event.preventDefault();
+                        
+                        let searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+                        let casesData = [
+                            { caseNo: '2023/001', partyName: 'John Doe', receiptNo: '12345', invoiceNo: 'INV-001' },
+                            { caseNo: '2023/002', partyName: 'Jane Smith', receiptNo: '54321', invoiceNo: 'INV-002' },
+                            { caseNo: '2023/003', partyName: 'Michael Johnson', receiptNo: '98765', invoiceNo: 'INV-003' }
+                            // Add more case data as needed
+                        ];
+            
+                        // Filter cases based on search input
+                        let filteredCases = casesData.filter(caseData =>
+                            caseData.caseNo.toLowerCase().includes(searchInput) ||
+                            caseData.partyName.toLowerCase().includes(searchInput) ||
+                            caseData.receiptNo.toLowerCase().includes(searchInput) ||
+                            caseData.invoiceNo.toLowerCase().includes(searchInput)
+                        );
+            
+                        // Display search results
+                        displaySearchResults(filteredCases);
+                    }
+            
+                    // Function to display search results
+                    function displaySearchResults(results) {
+                        let searchResultsDiv = document.getElementById('searchResults');
+                        searchResultsDiv.innerHTML = '';
+            
+                        if (results.length === 0) {
+                            searchResultsDiv.innerHTML = '<p>No results found.</p>';
+                        } else {
+                            results.forEach(result => {
+                                let resultDiv = document.createElement('div');
+                                resultDiv.classList.add('search-result');
+                                resultDiv.innerHTML = `
+                                    <p><strong>Case No:</strong> ${result.caseNo}</p>
+                                    <p><strong>Party Name:</strong> ${result.partyName}</p>
+                                    <p><strong>Receipt No:</strong> ${result.receiptNo}</p>
+                                    <p><strong>Invoice No:</strong> ${result.invoiceNo}</p>
+                                    <hr>
+                                `;
+                                searchResultsDiv.appendChild(resultDiv);
+                            });
+                        }
+                    }
+            
+                    // Initialize section on page load
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Initial data loading or other setup if needed
+                    });
+                </script>
+            </div>
+            <h2>Dashboard</h2>
+            <div class="dashboard-items">
+                <div class="dashboard-item" onclick="showDetails('totalNewCases')">
+                    <div class="dashboard-item-box">
+                        <h3>Total New Cases</h3>
+                        <p id="totalNewCases">0</p>
+                    </div>
+                    <div id="newCasesDetails" class="details hidden">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="dashboard-item" onclick="showDetails('totalOldCases')">
+                    <div class="dashboard-item-box">
+                        <h3>Total Old Cases</h3>
+                        <p id="totalOldCases">0</p>
+                    </div>
+                    <div id="oldCasesDetails" class="details hidden">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="dashboard-item" onclick="showDetails('totalMappingRequests')">
+                    <div class="dashboard-item-box">
+                        <h3>Total Mapping Requests</h3>
+                        <p id="totalMappingRequests">0</p>
+                    </div>
+                    <div id="mappingRequestsDetails" class="details hidden">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="dashboard-item" onclick="showDetails('totalInvoices')">
+                    <div class="dashboard-item-box">
+                        <h3>Total Invoices Created</h3>
+                        <p id="totalInvoices">0</p>
+                    </div>
+                    <div id="invoicesDetails" class="details hidden">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div class="dashboard-item" onclick="showDetails('totalUsers')">
+                    <div class="dashboard-item-box">
+                        <h3>Total Users</h3>
+                        <p id="totalUsers">0</p>
+                    </div>
+                    <div id="usersDetails" class="details hidden">
+                        <!-- Details will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- New Cases Section -->
+        <section id="newCases" class="section">
+            <h2>New Cases</h2>
+            <button id="addNewCaseBtn" onclick="openNewCaseForm()">+ Register New Case</button>
+            <div id="newCasesList">
+                <!-- New cases will be dynamically inserted here -->
+            </div>
+        </section>
+        
+        <!-- Hidden form for registering a new case -->
+        <div id="newCaseForm" style="display: none;">
+            <h3>Register New Case</h3>
+            <form id="caseForm" onsubmit="submitNewCase(event)">
+                <label for="caseType">Case Type:</label>
+                <select id="caseType" name="caseType" required>
+                    <option value="civil">Civil</option>
+                    <option value="succession">Succession</option>
+                    <option value="divorce">Divorce</option>
+                    <option value="children">Children</option>
+                    <option value="environment">Environment</option>
+                </select><br><br>
+        
+                <div id="plaintiffs">
+                    <h4>Plaintiff Details:</h4>
+                    <div class="party">
+                        <label>Name:</label>
+                        <input type="text" name="plaintiffName" required><br>
+                        <label>Phone No:</label>
+                        <input type="text" name="plaintiffPhone" required><br>
+                        <label>Location:</label>
+                        <input type="text" name="plaintiffLocation" required><br>
+                    </div>
+                </div>
+        
+                <button type="button" onclick="addParty('plaintiffs')">+ Add Plaintiff</button><br><br>
+        
+                <div id="defendants">
+                    <h4>Defendant Details:</h4>
+                    <div class="party">
+                        <label>Name:</label>
+                        <input type="text" name="defendantName" required><br>
+                        <label>Phone No:</label>
+                        <input type="text" name="defendantPhone" required><br>
+                        <label>Location:</label>
+                        <input type="text" name="defendantLocation" required><br>
+                    </div>
+                </div>
+        
+                <button type="button" onclick="addParty('defendants')">+ Add Defendant</button><br><br>
+        
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+<style> .section {
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.party {
+    margin-bottom: 10px;
+}
+
+.case-item {
+    margin-bottom: 20px;
+}
+
+button {
+    margin-top: 10px;
+}
+</style>        
+<script> let cases = []; // Array to store registered cases
+
+    // Function to open the new case form
+    function openNewCaseForm() {
+        document.getElementById('newCaseForm').style.display = 'block';
+    }
+    
+    // Function to submit a new case
+    function submitNewCase(event) {
+        event.preventDefault();
+        
+        // Fetch form values
+        let caseType = document.getElementById('caseType').value;
+        
+        let plaintiffs = [];
+        let plaintiffsInputs = document.querySelectorAll('#plaintiffs .party');
+        plaintiffsInputs.forEach(party => {
+            let plaintiff = {
+                name: party.querySelector('[name="plaintiffName"]').value,
+                phone: party.querySelector('[name="plaintiffPhone"]').value,
+                location: party.querySelector('[name="plaintiffLocation"]').value
+            };
+            plaintiffs.push(plaintiff);
+        });
+        
+        let defendants = [];
+        let defendantsInputs = document.querySelectorAll('#defendants .party');
+        defendantsInputs.forEach(party => {
+            let defendant = {
+                name: party.querySelector('[name="defendantName"]').value,
+                phone: party.querySelector('[name="defendantPhone"]').value,
+                location: party.querySelector('[name="defendantLocation"]').value
+            };
+            defendants.push(defendant);
+        });
+        
+        // Generate case number based on case type
+        let caseNumber = generateCaseNumber(caseType);
+        
+        // Get current date for date filed
+        let dateFiled = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+        
+        // Example: Replace with actual logic to assign court number
+        let assignedCourt = assignCourt(caseType);
+    
+        // Create new case object
+        let newCase = {
+            caseType: caseType,
+            caseNumber: caseNumber,
+            dateFiled: dateFiled,
+            plaintiffs: plaintiffs,
+            defendants: defendants,
+            assignedCourt: assignedCourt
+        };
+        
+        // Add new case to cases array
+        cases.push(newCase);
+        
+        // Add new case to displayed list
+        addToNewCasesList(newCase);
+        
+        // Reset form after submission
+        document.getElementById('caseForm').reset();
+        
+        // Hide the form after submission
+        document.getElementById('newCaseForm').style.display = 'none';
+    }
+    
+    // Function to generate case number based on case type
+    function generateCaseNumber(caseType) {
+        let prefix = '';
+        switch (caseType) {
+            case 'civil':
+                prefix = 'Mcc';
+                break;
+            case 'succession':
+                prefix = 'Mccsucc';
+                break;
+            case 'divorce':
+                prefix = 'Mccdiv';
+                break;
+            case 'children':
+                prefix = 'Mccchild';
+                break;
+            case 'environment':
+                prefix = 'Mccenv';
+                break;
+            default:
+                prefix = 'Mcc';
+        }
+        
+        // Example: Replace with actual logic to generate case number
+        let caseNumber = `${prefix}/${generateRandomNumber()}/2024`;
+        
+        return caseNumber;
+    }
+    
+    // Example: Function to assign court based on case type (replace with actual logic)
+    function assignCourt(caseType) {
+        // Replace with actual logic to assign court number
+        let assignedCourt = 'Court 1'; // Example: Assigning Court 1 by default
+        
+        return assignedCourt;
+    }
+    
+    // Function to add a new party (plaintiff or defendant)
+    function addParty(type) {
+        let partyDiv = document.createElement('div');
+        partyDiv.classList.add('party');
+        partyDiv.innerHTML = `
+            <label>Name:</label>
+            <input type="text" name="${type}Name" required><br>
+            <label>Phone No:</label>
+            <input type="text" name="${type}Phone" required><br>
+            <label>Location:</label>
+            <input type="text" name="${type}Location" required><br>
+        `;
+        document.getElementById(type).appendChild(partyDiv);
+    }
+    
+    // Function to add new case to the list
+    function addToNewCasesList(newCase) {
+        let newCaseElement = document.createElement('div');
+        newCaseElement.classList.add('case-item');
+        newCaseElement.innerHTML = `
+            <div>
+                <strong>Case Number:</strong> ${newCase.caseNumber}<br>
+                <strong>Date Filed:</strong> ${newCase.dateFiled}<br>
+                <strong>Case Type:</strong> ${newCase.caseType}<br>
+                <strong>Plaintiffs:</strong><br>
+                ${newCase.plaintiffs.map(plaintiff => `${plaintiff.name}, ${plaintiff.phone}, ${plaintiff.location}`).join('<br>')}<br>
+                <strong>Defendants:</strong><br>
+                ${newCase.defendants.map(defendant => `${defendant.name}, ${defendant.phone}, ${defendant.location}`).join('<br>')}<br>
+                <strong>Assigned Court:</strong> ${newCase.assignedCourt}<br>
+                <button onclick="editCase('${newCase.caseNumber}')">Edit</button>
+                <button onclick="deleteCase('${newCase.caseNumber}')">Delete</button>
+            </div>
+            <hr>
+        `;
+        document.getElementById('newCasesList').appendChild(newCaseElement);
+    }
+    
+    // Function to edit a case
+    function editCase(caseNumber) {
+        // Example: Implement edit functionality as per your requirements
+        alert(`Editing case ${caseNumber}`);
+    }
+    
+    // Function to delete a case
+    function deleteCase(caseNumber) {
+        // Example: Implement delete functionality as per your requirements
+        cases = cases.filter(c => c.caseNumber !== caseNumber);
+        refreshCasesList();
+    }
+    
+    // Function to refresh cases list after editing or deleting a case
+    function refreshCasesList() {
+        document.getElementById('newCasesList').innerHTML = '';
+        cases.forEach(caseItem => {
+            addToNewCasesList(caseItem);
+        });
+    }
+    
+    // Example: Function to generate a random number (replace with your actual logic)
+    function generateRandomNumber() {
+        return Math.floor(Math.random() * 1000) + 1; // Example: Generate random number
+    }
+    
+    // Initial load or any other setup
+    // Add any initial setup logic here if needed
+    </script>
+    </div>
+    </body>
+</section>
+
+
+        <!-- Old Cases Section -->
+        <section id="uploadcourtdocuments" class="section">
+            <h2>upload documents</h2>
+            <div >
+                <!-- Old<section id="uploadCourtDocuments" class="section">
+        <h2>Upload Court Documents</h2>
+
+        <!-- Search Form -->
+        <form id="searchForm" onsubmit="searchCase(event)">
+            <label for="searchInput">Search by Case No, Parties, or Invoice No:</label>
+            <input type="text" id="searchInput" name="searchInput" required>
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Display Search Results -->
+        <div id="searchResults">
+            <!-- Search results will be dynamically inserted here -->
+        </div>
+
+        <!-- Document Upload Form -->
+        <div id="documentUploadForm" style="display: none;">
+            <h3>Upload Court Document</h3>
+            <form id="uploadForm" onsubmit="uploadDocument(event)">
+                <label for="caseNumber">Case Number:</label>
+                <input type="text" id="caseNumber" name="caseNumber" readonly><br><br>
+                <label for="documentType">Document Type:</label>
+                <input type="text" id="documentType" name="documentType" required><br><br>
+                <label for="documentFile">Select Document File:</label>
+                <input type="file" id="documentFile" name="documentFile" accept=".pdf, .doc, .docx" required><br><br>
+                <button type="submit">Upload Document</button>
+            </form>
+        </div>
+
+        <!-- Uploaded Documents List -->
+        <div id="uploadedDocuments">
+            <!-- Uploaded documents will be dynamically inserted here -->
+        </div>
+    </section>
+
+    <script>
+        // Function to search for case details
+        function searchCase(event) {
+            event.preventDefault();
+            
+            let searchInput = document.getElementById('searchInput').value.trim().toLowerCase();
+            let casesData = [
+                { caseNo: '2023/001', parties: 'John Doe vs. Jane Smith', invoiceNo: 'INV-001' },
+                { caseNo: '2023/002', parties: 'Michael Johnson vs. Sarah Brown', invoiceNo: 'INV-002' },
+                { caseNo: '2023/003', parties: 'David Lee vs. Emma White', invoiceNo: 'INV-003' }
+                // Add more case data as needed
+            ];
+
+            // Filter cases based on search input
+            let filteredCases = casesData.filter(caseData =>
+                caseData.caseNo.toLowerCase().includes(searchInput) ||
+                caseData.parties.toLowerCase().includes(searchInput) ||
+                caseData.invoiceNo.toLowerCase().includes(searchInput)
+            );
+
+            // Display search results
+            displaySearchResults(filteredCases);
+        }
+
+        // Function to display search results
+        function displaySearchResults(results) {
+            let searchResultsDiv = document.getElementById('searchResults');
+            searchResultsDiv.innerHTML = '';
+
+            if (results.length === 0) {
+                searchResultsDiv.innerHTML = '<p>No results found.</p>';
+                document.getElementById('documentUploadForm').style.display = 'none'; // Hide upload form if no results
+            } else {
+                results.forEach(result => {
+                    let resultDiv = document.createElement('div');
+                    resultDiv.classList.add('search-result');
+                    resultDiv.innerHTML = `
+                        <p><strong>Case No:</strong> ${result.caseNo}</p>
+                        <p><strong>Parties:</strong> ${result.parties}</p>
+                        <p><strong>Invoice No:</strong> ${result.invoiceNo}</p>
+                        <button onclick="prepareUpload('${result.caseNo}')">Upload Document</button>
+                        <hr>
+                    `;
+                    searchResultsDiv.appendChild(resultDiv);
+                });
+            }
+        }
+
+        // Function to prepare upload form with selected case details
+        function prepareUpload(caseNumber) {
+            document.getElementById('caseNumber').value = caseNumber;
+            document.getElementById('documentUploadForm').style.display = 'block'; // Show upload form
+            loadUploadedDocuments(caseNumber); // Load already uploaded documents if any
+        }
+
+        // Function to upload document
+        function uploadDocument(event) {
+            event.preventDefault();
+
+            let caseNumber = document.getElementById('caseNumber').value;
+            let documentType = document.getElementById('documentType').value;
+            let documentFile = document.getElementById('documentFile').files[0];
+
+            // Simulate document upload logic
+            // Replace with actual upload code to server/database
+            console.log(`Uploading document for Case No: ${caseNumber}, Document Type: ${documentType}`);
+
+            // Clear upload form fields
+            document.getElementById('documentType').value = '';
+            document.getElementById('documentFile').value = '';
+
+            // Display uploaded documents
+            loadUploadedDocuments(caseNumber);
+        }
+
+        // Function to load already uploaded documents for a case
+        function loadUploadedDocuments(caseNumber) {
+            // Simulate loading of uploaded documents
+            let uploadedDocuments = [
+                { documentId: 1, documentType: 'Court Decision', fileName: 'decision2023.pdf' },
+                { documentId: 2, documentType: 'Court Order', fileName: 'order2023.docx' }
+                // Add more documents as needed
+            ];
+
+            let uploadedDocumentsDiv = document.getElementById('uploadedDocuments');
+            uploadedDocumentsDiv.innerHTML = '';
+
+            if (uploadedDocuments.length === 0) {
+                uploadedDocumentsDiv.innerHTML = '<p>No documents uploaded for this case.</p>';
+            } else {
+                uploadedDocuments.forEach(doc => {
+                    let docDiv = document.createElement('div');
+                    docDiv.innerHTML = `
+                        <p><strong>Document Type:</strong> ${doc.documentType}</p>
+                        <p><strong>File Name:</strong> ${doc.fileName}</p>
+                        <hr>
+                    `;
+                    uploadedDocumentsDiv.appendChild(docDiv);
+                });
+            }
+        }
+
+        // Initialize section on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial setup or data loading if needed
+        });
+    </script> 
+    <!---cases will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Mapping Requests Section -->
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Mapping Requests</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+        
+                .section {
+                    padding: 20px;
+                    margin: 20px auto;
+                    max-width: 800px;
+                    background-color: #fff;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                }
+        
+                h2 {
+                    margin-top: 0;
+                }
+        
+                .mapping-request-item {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    background-color: #f9f9f9;
+                }
+        
+                button {
+                    padding: 5px 10px;
+                    margin-top: 10px;
+                    margin-right: 10px;
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #28a745;
+                    color: #fff;
+                    cursor: pointer;
+                }
+        
+                button:hover {
+                    background-color: #218838;
+                }
+        
+                .mapping-message {
+                    display: none;
+                    padding: 10px;
+                    margin-top: 20px;
+                    border: 1px solid #28a745;
+                    border-radius: 5px;
+                    background-color: #d4edda;
+                    color: #155724;
+                }
+            </style>
+        </head>
+        <body>
+            <section id="mappingRequests" class="section">
+                <h2>Mapping Requests</h2>
+                <div id="mappingRequestsList">
+                    <!-- Mapping requests will be dynamically inserted here -->
+                </div>
+                <div id="mappingMessage" class="mapping-message">
+                    <!-- Success message will be displayed here -->
+                </div>
+        
+                <!-- Form for adding a new mapping request (visible in the section) -->
+                <div id="addMappingRequestForm">
+                    <h3>Add Mapping Request (Demo)</h3>
+                    <form id="addMappingRequestFormElement" onsubmit="addMappingRequest(event)">
+                        <label for="requesterName">Requester Name:</label>
+                        <input type="text" id="requesterName" name="requesterName" required><br><br>
+                        <label for="caseNumber">Case Number:</label>
+                        <input type="text" id="caseNumber" name="caseNumber" required><br><br>
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </section>
+        
+            <script>
+                let mappingRequests = []; // Array to store mapping requests
+        
+                // Function to add a new mapping request (for demo purposes)
+                function addMappingRequest(event) {
+                    event.preventDefault();
+                    
+                    let requesterName = document.getElementById('requesterName').value;
+                    let caseNumber = document.getElementById('caseNumber').value;
+                    
+                    let newMappingRequest = {
+                        requesterName: requesterName,
+                        caseNumber: caseNumber,
+                        status: 'Pending'
+                    };
+                    
+                    mappingRequests.push(newMappingRequest);
+                    refreshMappingRequestsList();
+                    
+                    document.getElementById('addMappingRequestFormElement').reset();
+                }
+        
+                // Function to refresh the mapping requests list
+                function refreshMappingRequestsList() {
+                    let list = document.getElementById('mappingRequestsList');
+                    list.innerHTML = '';
+                    
+                    mappingRequests.forEach((request, index) => {
+                        let requestElement = document.createElement('div');
+                        requestElement.classList.add('mapping-request-item');
+                        requestElement.innerHTML = `
+                            <div>
+                                <strong>Requester Name:</strong> ${request.requesterName}<br>
+                                <strong>Case Number:</strong> ${request.caseNumber}<br>
+                                <strong>Status:</strong> ${request.status}<br>
+                                <button onclick="approveAndMarkActive(${index})">Approve & Mark Active</button>
+                                <button onclick="approveAndMarkClosed(${index})">Approve & Mark Closed</button>
+                                <button onclick="requestMoreInfo(${index})">Disapprove & Request More Info</button>
+                            </div>
+                            <hr>
+                        `;
+                        list.appendChild(requestElement);
+                    });
+                }
+        
+                // Function to approve and mark a request as active
+                function approveAndMarkActive(index) {
+                    mappingRequests[index].status = 'Active';
+                    showMappingMessage('Mapping approval successful: Case marked as active.');
+                    refreshMappingRequestsList();
+                }
+        
+                // Function to approve and mark a request as closed
+                function approveAndMarkClosed(index) {
+                    mappingRequests[index].status = 'Closed';
+                    showMappingMessage('Mapping approval successful: Case marked as closed.');
+                    refreshMappingRequestsList();
+                }
+        
+                // Function to disapprove and request more information
+                function requestMoreInfo(index) {
+                    mappingRequests[index].status = 'More Information Needed';
+                    showMappingMessage('More information requested for the case.');
+                    refreshMappingRequestsList();
+                }
+        
+                // Function to show a success message
+                function showMappingMessage(message) {
+                    let messageDiv = document.getElementById('mappingMessage');
+                    messageDiv.innerHTML = message;
+                    messageDiv.style.display = 'block';
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000); // Hide after 3 seconds
+                }
+        
+                // Initial load or any other setup
+                refreshMappingRequestsList();
+            </script>
+        </body>
+        <!-- Invoices Section -->
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Invoices</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+        
+                .section {
+                    padding: 20px;
+                    margin: 20px auto;
+                    max-width: 800px;
+                    background-color: #fff;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                }
+        
+                h2 {
+                    margin-top: 0;
+                }
+        
+                .invoice-item {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    background-color: #f9f9f9;
+                }
+        
+                button {
+                    padding: 5px 10px;
+                    margin-top: 10px;
+                    margin-right: 10px;
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #28a745;
+                    color: #fff;
+                    cursor: pointer;
+                }
+        
+                button:hover {
+                    background-color: #218838;
+                }
+        
+                .invoice-message {
+                    display: none;
+                    padding: 10px;
+                    margin-top: 20px;
+                    border: 1px solid #28a745;
+                    border-radius: 5px;
+                    background-color: #d4edda;
+                    color: #155724;
+                }
+        
+                #createInvoiceForm {
+                    display: none;
+                }
+        
+                .watermark {
+                    position: absolute;
+                    opacity: 0.1;
+                    font-size: 100px;
+                    transform: rotate(-45deg);
+                    color: red;
+                    z-index: 0;
+                }
+        
+                .invoice-container {
+                    position: relative;
+                    padding: 20px;
+                    margin: 20px;
+                    background: white;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                }
+        
+                .invoice-header {
+                    text-align: center;
+                    font-size: 24px;
+                    font-weight: bold;
+                }
+        
+                .invoice-details {
+                    margin-top: 20px;
+                }
+        
+                .invoice-details div {
+                    margin-bottom: 10px;
+                }
+        
+                .download-button {
+                    margin-top: 20px;
+                }
+            </style>
+        </head>
+        <body>
+            <section id="invoices" class="section">
+                <h2>Invoices</h2>
+                <button onclick="toggleInvoiceForm()">+ Create New Invoice</button>
+                <div id="invoicesList">
+                    <!-- Invoices will be dynamically inserted here -->
+                </div>
+                <div id="invoiceMessage" class="invoice-message">
+                    <!-- Success message will be displayed here -->
+                </div>
+        
+                <!-- Form for creating a new invoice -->
+                <div id="createInvoiceForm">
+                    <h3>Create New Invoice</h3>
+                    <form id="createInvoiceFormElement" onsubmit="createInvoice(event)">
+                        <label for="caseNumber">Case Number:</label>
+                        <input type="text" id="caseNumber" name="caseNumber" required><br><br>
+                        <label for="amount">Amount to be Paid:</label>
+                        <input type="number" id="amount" name="amount" required><br><br>
+                        <label for="paymentMode">Payment Mode:</label>
+                        <input type="text" id="paymentMode" name="paymentMode" required><br><br>
+                        <label for="paymentFor">Payments For:</label>
+                        <input type="text" id="paymentFor" name="paymentFor" required><br><br>
+                        <label for="transactionDate">Transaction Date:</label>
+                        <input type="text" id="transactionDate" name="transactionDate" readonly><br><br>
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </section>
+        
+            <script>
+                let invoices = []; // Array to store invoices
+                let nextInvoiceNumber = 1; // Counter for generating invoice numbers
+        
+                // Function to toggle the invoice creation form visibility
+                function toggleInvoiceForm() {
+                    let form = document.getElementById('createInvoiceForm');
+                    if (form.style.display === 'none' || form.style.display === '') {
+                        form.style.display = 'block';
+                    } else {
+                        form.style.display = 'none';
+                    }
+                }
+        
+                // Function to create a new invoice
+                function createInvoice(event) {
+                    event.preventDefault();
+        
+                    let caseNumber = document.getElementById('caseNumber').value;
+                    let amount = document.getElementById('amount').value;
+                    let paymentMode = document.getElementById('paymentMode').value;
+                    let paymentFor = document.getElementById('paymentFor').value;
+                    let transactionDate = new Date().toLocaleDateString();
+        
+                    let newInvoice = {
+                        invoiceNumber: `INV${nextInvoiceNumber++}`,
+                        caseNumber: caseNumber,
+                        amount: amount,
+                        paymentMode: paymentMode,
+                        paymentFor: paymentFor,
+                        transactionDate: transactionDate,
+                        status: 'Pending'
+                    };
+        
+                    invoices.push(newInvoice);
+                    refreshInvoicesList();
+        
+                    document.getElementById('createInvoiceFormElement').reset();
+                    document.getElementById('transactionDate').value = transactionDate;
+                }
+        
+                // Function to refresh the invoices list
+                function refreshInvoicesList() {
+                    let list = document.getElementById('invoicesList');
+                    list.innerHTML = '';
+        
+                    invoices.forEach((invoice, index) => {
+                        let invoiceElement = document.createElement('div');
+                        invoiceElement.classList.add('invoice-item');
+                        invoiceElement.innerHTML = `
+                            <div>
+                                <strong>Invoice Number:</strong> ${invoice.invoiceNumber}<br>
+                                <strong>Case Number:</strong> ${invoice.caseNumber}<br>
+                                <strong>Amount:</strong> ${invoice.amount}<br>
+                                <strong>Payment Mode:</strong> ${invoice.paymentMode}<br>
+                                <strong>Payments For:</strong> ${invoice.paymentFor}<br>
+                                <strong>Transaction Date:</strong> ${invoice.transactionDate}<br>
+                                <strong>Status:</strong> ${invoice.status}<br>
+                                <button onclick="approveInvoice(${index})">Approve</button>
+                                <button onclick="voidInvoice(${index})">Void</button>
+                                <button onclick="downloadInvoice(${index})">Download</button>
+                            </div>
+                            <hr>
+                        `;
+                        list.appendChild(invoiceElement);
+                    });
+                }
+        
+                // Function to approve an invoice
+                function approveInvoice(index) {
+                    invoices[index].status = 'Approved';
+                    showInvoiceMessage('Invoice approved successfully.');
+                    refreshInvoicesList();
+                }
+        
+                // Function to void an invoice
+                function voidInvoice(index) {
+                    invoices[index].status = 'Void';
+                    showInvoiceMessage('Invoice voided successfully.');
+                    refreshInvoicesList();
+                }
+        
+                // Function to show a success message
+                function showInvoiceMessage(message) {
+                    let messageDiv = document.getElementById('invoiceMessage');
+                    messageDiv.innerHTML = message;
+                    messageDiv.style.display = 'block';
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000); // Hide after 3 seconds
+                }
+        
+                // Function to download an invoice
+                function downloadInvoice(index) {
+                    let invoice = invoices[index];
+                    let invoiceContent = `
+                        <div class="invoice-container">
+                            <div class="invoice-header">Kisii Law Court<br>INVOICE</div>
+                            <div class="invoice-details">
+                                <div><strong>Invoice Number:</strong> ${invoice.invoiceNumber}</div>
+                                <div><strong>Case Number:</strong> ${invoice.caseNumber}</div>
+                                <div><strong>Amount:</strong> ${invoice.amount}</div>
+                                <div><strong>Payment Mode:</strong> ${invoice.paymentMode}</div>
+                                <div><strong>Payments For:</strong> ${invoice.paymentFor}</div>
+                                <div><strong>Transaction Date:</strong> ${invoice.transactionDate}</div>
+                                <div><strong>Status:</strong> ${invoice.status}</div>
+                            </div>
+                            <div class="watermark">Not Paid</div>
+                        </div>
+                    `;
+        
+                    let newWindow = window.open('', '_blank');
+                    newWindow.document.write(invoiceContent);
+                    newWindow.document.close();
+                    newWindow.print();
+                }
+        
+                // Initial setup
+                document.getElementById('transactionDate').value = new Date().toLocaleDateString();
+                refreshInvoicesList();
+            </script>
+        </body>
+
+        <!-- Users Section -->
+        <section id="users" class="section">
+            <h2>Users</h2>
+            <div id="usersList">
+                <!-- Users will be dynamically inserted here -->
+            </div>
+        </section>
+
+        <!-- Missing Files Section -->
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Missing Files</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+        
+                .section {
+                    padding: 20px;
+                    margin: 20px auto;
+                    max-width: 800px;
+                    background-color: #fff;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    border-radius: 8px;
+                }
+        
+                h2 {
+                    margin-top: 0;
+                }
+        
+                .file-item {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    background-color: #f9f9f9;
+                }
+        
+                button {
+                    padding: 5px 10px;
+                    margin-top: 10px;
+                    margin-right: 10px;
+                    border: none;
+                    border-radius: 5px;
+                    background-color: #007bff;
+                    color: #fff;
+                    cursor: pointer;
+                }
+        
+                button:hover {
+                    background-color: #0056b3;
+                }
+        
+                #createFileForm {
+                    display: none;
+                }
+        
+                .file-message {
+                    display: none;
+                    padding: 10px;
+                    margin-top: 20px;
+                    border: 1px solid #28a745;
+                    border-radius: 5px;
+                    background-color: #d4edda;
+                    color: #155724;
+                }
+            </style>
+        </head>
+        <body>
+            <section id="missingFiles" class="section">
+                <h2>Missing Files</h2>
+                <button onclick="toggleFileForm()">+ Add Missing File</button>
+                <div id="missingFilesList">
+                    <!-- Missing files will be dynamically inserted here -->
+                </div>
+                <div id="fileMessage" class="file-message">
+                    <!-- Success message will be displayed here -->
+                </div>
+        
+                <!-- Form for adding a new missing file -->
+                <div id="createFileForm">
+                    <h3>Add Missing File</h3>
+                    <form id="createFileFormElement" onsubmit="addMissingFile(event)">
+                        <label for="requesterName">Requester's Name:</label>
+                        <input type="text" id="requesterName" name="requesterName" required><br><br>
+                        <label for="phoneNumber">Phone Number:</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" required><br><br>
+                        <label for="caseNumber">Case Number:</label>
+                        <input type="text" id="caseNumber" name="caseNumber" required><br><br>
+                        <label for="lastDateInCourt">Last Date in Court:</label>
+                        <input type="date" id="lastDateInCourt" name="lastDateInCourt" required><br><br>
+                        <label for="nextDateInCourt">Next Date in Court:</label>
+                        <input type="date" id="nextDateInCourt" name="nextDateInCourt" required><br><br>
+                        <label for="caseStatus">Case Status:</label>
+                        <select id="caseStatus" name="caseStatus" required>
+                            <option value="pending">Pending</option>
+                            <option value="finalized">Finalized</option>
+                            <option value="active">Active</option>
+                        </select><br><br>
+                        <button type="submit">Submit</button>
+                    </form>
+                </div>
+            </section>
+        
+            <script>
+                let missingFiles = []; // Array to store missing files
+        
+                // Function to toggle the missing file form visibility
+                function toggleFileForm() {
+                    let form = document.getElementById('createFileForm');
+                    if (form.style.display === 'none' || form.style.display === '') {
+                        form.style.display = 'block';
+                    } else {
+                        form.style.display = 'none';
+                    }
+                }
+        
+                // Function to add a new missing file
+                function addMissingFile(event) {
+                    event.preventDefault();
+        
+                    let requesterName = document.getElementById('requesterName').value;
+                    let phoneNumber = document.getElementById('phoneNumber').value;
+                    let caseNumber = document.getElementById('caseNumber').value;
+                    let lastDateInCourt = document.getElementById('lastDateInCourt').value;
+                    let nextDateInCourt = document.getElementById('nextDateInCourt').value;
+                    let caseStatus = document.getElementById('caseStatus').value;
+        
+                    let newFile = {
+                        requesterName: requesterName,
+                        phoneNumber: phoneNumber,
+                        caseNumber: caseNumber,
+                        lastDateInCourt: lastDateInCourt,
+                        nextDateInCourt: nextDateInCourt,
+                        caseStatus: caseStatus
+                    };
+        
+                    missingFiles.push(newFile);
+                    refreshFilesList();
+        
+                    document.getElementById('createFileFormElement').reset();
+                    toggleFileForm();
+                    showFileMessage('Missing file added successfully.');
+                }
+        
+                // Function to refresh the missing files list
+                function refreshFilesList() {
+                    let list = document.getElementById('missingFilesList');
+                    list.innerHTML = '';
+        
+                    missingFiles.forEach((file, index) => {
+                        let fileElement = document.createElement('div');
+                        fileElement.classList.add('file-item');
+                        fileElement.innerHTML = `
+                            <div>
+                                <strong>Requester's Name:</strong> ${file.requesterName}<br>
+                                <strong>Phone Number:</strong> ${file.phoneNumber}<br>
+                                <strong>Case Number:</strong> ${file.caseNumber}<br>
+                                <strong>Last Date in Court:</strong> ${file.lastDateInCourt}<br>
+                                <strong>Next Date in Court:</strong> ${file.nextDateInCourt}<br>
+                                <strong>Case Status:</strong> ${file.caseStatus}<br>
+                                <button onclick="deleteFile(${index})">Delete</button>
+                            </div>
+                            <hr>
+                        `;
+                        list.appendChild(fileElement);
+                    });
+                }
+        
+                // Function to delete a missing file
+                function deleteFile(index) {
+                    missingFiles.splice(index, 1);
+                    refreshFilesList();
+                    showFileMessage('Missing file deleted successfully.');
+                }
+        
+                // Function to show a success message
+                function showFileMessage(message) {
+                    let messageDiv = document.getElementById('fileMessage');
+                    messageDiv.innerHTML = message;
+                    messageDiv.style.display = 'block';
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000); // Hide after 3 seconds
+                }
+        
+                // Initial call to display any pre-existing missing files
+                refreshFilesList();
+            </script>
+        </body>
+                    <!-- Missing files will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+    <style> /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+        
+        nav {
+            background-color: #1097c0;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        nav ul li {
+            display: inline;
+            margin-right: 20px;
+        }
+        
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            transition: background-color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            background-color: #555;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .section {
+            display: none;
+            padding: 20px;
+            background-color: #d6d6d0;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        /* Dashboard Styles */
+        .dashboard-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .dashboard-item {
+            width: calc(33.33% - 20px);
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dashboard-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .dashboard-item-box {
+            text-align: center;
+        }
+        
+        .details {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .details.active {
+            display: block;
+        }
+        
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #333;
+            color: white;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            button {
+                padding: 8px 16px;
+            }
+            input[type=text] {
+                padding: 6px 10px;
+            }
+            .dashboard-item {
+                width: 100%;
+            }
+        }
+        </style>
+
+    <script> // Sample data (replace with actual data handling)
+        let newCasesData = [];
+        let oldCasesData = [];
+        let mappingRequestsData = [];
+        let invoicesData = [];
+        let usersData = [];
+        let missingFilesData = [];
+        
+        // Function to show a specific section
+        function showSection(sectionId) {
+            // Hide all sections
+            let sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+        
+            // Show the selected section
+            let section = document.getElementById(sectionId);
+            if (section) {
+                section.style.display = 'block';
+            }
+        
+            // Load data if needed
+            switch (sectionId) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'newCases':
+                    loadNewCases();
+                    break;
+                case 'oldCases':
+                    loadOldCases();
+                    break;
+                case 'mappingRequests':
+                    loadMappingRequests();
+                    break;
+                case 'invoices':
+                    loadInvoices();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'missingFiles':
+                    loadMissingFiles();
+                    break;
+                default:
+                    break;
+            }
+        }
+        
+        // Function to load dashboard totals
+        function loadDashboard() {
+            // Example: Fetch totals from API or database
+            document.getElementById('totalNewCases').textContent = newCasesData.length;
+            document.getElementById('totalOldCases').textContent = oldCasesData.length;
+            document.getElementById('totalMappingRequests').textContent = mappingRequestsData.length;
+            document.getElementById('totalInvoices').textContent = invoicesData.length;
+            document.getElementById('totalUsers').textContent = usersData.length;
+        }
+        
+        // Function to show details on click (for dashboard items)
+        function showDetails(itemId) {
+            let details = document.getElementById(itemId + 'Details');
+            if (details) {
+                details.classList.toggle('active');
+            }
+        }
+        
+        // Dummy functions to load data (replace with actual data loading)
+        function loadNewCases() {
+            // Example: Fetch new cases data from API or database
+            // Populate newCasesData array and update UI
+            document.getElementById('newCasesList').innerHTML = '<p>No new cases available.</p>';
+        }
+        
+        function loadOldCases() {
+            // Example: Fetch old cases data from API or database
+            // Populate oldCasesData array and update UI
+            document.getElementById('oldCasesList').innerHTML = '<p>No old cases available.</p>';
+        }
+        
+        function loadMappingRequests() {
+            // Example: Fetch mapping requests data from API or database
+            // Populate mappingRequestsData array and update UI
+            document.getElementById('mappingRequestsList').innerHTML = '<p>No mapping requests available.</p>';
+        }
+        
+        function loadInvoices() {
+            // Example: Fetch invoices data from API or database
+            // Populate invoicesData array and update UI
+            document.getElementById('invoicesList').innerHTML = '<p>No invoices available.</p>';
+        }
+        
+        function loadUsers() {
+            // Example: Fetch users data from API or database
+            // Populate usersData array and update UI
+            document.getElementById('usersList').innerHTML = '<p>No users available.</p>';
+        }
+        
+        function loadMissingFiles() {
+            // Example: Fetch missing files data from API or database
+            // Populate missingFilesData array and update UI
+            document.getElementById('missingFilesTable').innerHTML = '<tbody><tr><td colspan="5">No missing files found.</td></tr></tbody>';
+        }
+        
+        // Initial load - show dashboard by default
+        showSection('dashboard');
+        </script>
+
+<section id="Messages, Requests, and Complaints" class="section">
+    <h2>Messages, Requests, and Complaints</h2>
+
+    <!-- Display messages, requests, and complaints dynamically -->
+    <div id="messagesRequestsComplaintsList">
+        <!-- Messages, requests, and complaints will be dynamically inserted here -->
+    </div>
+
+    <!-- Send Message by Case Number Form -->
+    <h3>Send Message by Case Number</h3>
+    <form id="sendMessageForm" onsubmit="sendMessageByCaseNumber(event)">
+        <label for="caseNumberMessage">Case Number:</label>
+        <input type="text" id="caseNumberMessage" name="caseNumberMessage" required><br><br>
+        <label for="messageContent">Message:</label><br>
+        <textarea id="messageContent" name="messageContent" rows="4" cols="50" required></textarea><br><br>
+        <button type="submit">Send Message</button>
+    </form>
+
+    <!-- Communication Platform -->
+    <h3>Communication Platform</h3>
+    <button onclick="displayCommunicationPlatform()">Open Communication Platform</button>
+    
+    <!-- Message Details Modal -->
+    <div id="messageDetails" style="display: none;">
+        <h3>Message Details</h3>
+        <p><strong>Case Number:</strong> <span id="messageCaseNumber"></span></p>
+        <p><strong>Message:</strong> <span id="messageContent"></span></p>
+        <textarea id="replyContent" placeholder="Enter your reply here"></textarea><br><br>
+        <button onclick="replyToMessage()">Reply</button>
+    </div>
+</section>
+
+<script>
+    // Function to load messages, requests, and complaints
+    function loadMessagesRequestsComplaints() {
+        // Example: Load data from backend or simulate for demo purposes
+        let messagesRequestsComplaintsData = [
+            { id: 1, type: 'Message', caseNumber: '2023/001', content: 'Lorem ipsum dolor sit amet.', date: '2024-07-03' },
+            { id: 2, type: 'Request', caseNumber: '2023/002', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', date: '2024-07-02' },
+            { id: 3, type: 'Complaint', caseNumber: '2023/003', content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', date: '2024-07-01' }
+        ];
+
+        // Clear previous content
+        let listContainer = document.getElementById('messagesRequestsComplaintsList');
+        listContainer.innerHTML = '';
+
+        // Check if there are messages to display
+        if (messagesRequestsComplaintsData.length === 0) {
+            listContainer.innerHTML = '<p>No messages, requests, or complaints to display.</p>';
+        } else {
+            // Display messages, requests, and complaints
+            messagesRequestsComplaintsData.forEach(item => {
+                let itemDiv = document.createElement('div');
+                itemDiv.classList.add('message-item');
+
+                let itemContent = `<strong>${item.type}</strong>: ${item.content} - ${item.date} <button onclick="viewMessageDetails('${item.caseNumber}', '${item.content}')">View Details</button>`;
+                itemDiv.innerHTML = itemContent;
+
+                listContainer.appendChild(itemDiv);
+            });
+        }
+    }
+
+    // Function to view message details
+    function viewMessageDetails(caseNumber, messageContent) {
+        document.getElementById('messageCaseNumber').textContent = caseNumber;
+        document.getElementById('messageContent').textContent = messageContent;
+        document.getElementById('messageDetails').style.display = 'block';
+    }
+
+    // Function to reply to a message
+    function replyToMessage() {
+        let replyContent = document.getElementById('replyContent').value;
+        let caseNumber = document.getElementById('messageCaseNumber').textContent;
+
+        // Example: Logic to send reply, can be simulated for demo purposes
+        console.log(`Reply sent to case number ${caseNumber}: ${replyContent}`);
+
+        // Clear reply textarea
+        document.getElementById('replyContent').value = '';
+
+        // Display a success message or update UI as needed
+        alert('Reply sent successfully!');
+    }
+
+    // Function to send a message to a user based on case number
+    function sendMessageByCaseNumber(event) {
+        event.preventDefault();
+
+        let caseNumber = document.getElementById('caseNumberMessage').value;
+        let messageContent = document.getElementById('messageContent').value;
+
+        // Example: Send message logic goes here, can be simulated for demo purposes
+        console.log(`Message sent to case number ${caseNumber}: ${messageContent}`);
+
+        // Clear the form fields after sending message
+        document.getElementById('caseNumberMessage').value = '';
+        document.getElementById('messageContent').value = '';
+
+        // Display a success message or update the UI as needed
+        alert('Message sent successfully!');
+    }
+
+    // Function to display a communication platform or chat interface
+    function displayCommunicationPlatform() {
+        // Implement functionality to display communication platform
+        document.getElementById('communicationPlatform').style.display = 'block';
+    }
+
+    // Initialize section on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMessagesRequestsComplaints();
+    });
+</script>
+</body>
+    
+       
+</body>
+</html>
